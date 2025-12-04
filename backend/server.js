@@ -41,7 +41,7 @@ const PORT = ENV_VARS.PORT || 5000;
 app.use(express.static(path.join(__dirname, "frontend/dist")));
 
 // For all other routes not starting with /api, send index.html
-app.get('*', (req, res) => {
+app.get(/^\/(?!api).*/, (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
   }
