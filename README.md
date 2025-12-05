@@ -1,5 +1,7 @@
 ✍️  My project is a complete full-stack application built using the mern stack with modern frontend tools and integrated Ai features.
+
 📲  On the frontend ,I used react with vite,tailwind and framermotion to fast and smooth ui.state is manages using zustand and axios interceptors handles authentication securely.
+
 💻  I used a modular backend architecture(MVC),stateless JWT authentication with access and refresh token ,Scalalable MongoDB,Cloudinary for offloading uploads ,Rest api for seem less connection between both ends and Nodemailor for email service.
 
 🪄Features
