@@ -14,6 +14,7 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
+
 } from "recharts";
 import { motion } from "framer-motion";
 
@@ -72,6 +73,7 @@ export default function Analytics() {
     );
   }
 
+
   if (!user || user.role !== "admin") {
     navigate("/login", { replace: true });
     return null;
@@ -118,96 +120,115 @@ export default function Analytics() {
     }, {})
   ).map(([name, count]) => ({ name, applications: count }));
 
+
   // ====== UI ======
   return (
+
+
     <motion.div
       className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-gray-100 p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      <h1 className="text-4xl font-bold mb-10 text-center text-indigo-400">
+      <motion.h1
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="text-3xl font-semibold mb-8"
+      >
         Job Analytics Dashboard
-      </h1>
+      </motion.h1>
+      {applications.length === 0 ? (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 dark:text-gray-400"
+        >
+          No applications status received yet.
+        </motion.p>
+      ) :
 
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* Applications by Status */}
-        <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition">
-          <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
-            Applications by Status
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={appsByStatus}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label
-              >
-                {appsByStatus.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#9ca3af",
-                  borderRadius: "8px",
-                  border: "none",
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Jobs by Company */}
-        <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition">
-          <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
-            Users applied Jobs by Company
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={jobsByCompany}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="name" stroke="#9ca3af" />
-              <YAxis allowDecimals={false} stroke="#9ca3af" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  borderRadius: "8px",
-                  border: "none",
-                }}
-              />
-              <Legend />
-              <Bar dataKey="jobs" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+        (
+          <>
+            <div className="grid gap-8 md:grid-cols-2">
 
-      {/* Applications per User */}
-      <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition mt-8">
-        <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
-          Applications by User
-        </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={appliedJobsByUser}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="name" stroke="#9ca3af" />
-            <YAxis allowDecimals={false} stroke="#9ca3af" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#1f2937",
-                borderRadius: "8px",
-                border: "none",
-              }}
-            />
-            <Legend />
-            <Bar dataKey="applications" fill="#22c55e" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+              <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition">
+                <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
+                  Applications by Status
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={appsByStatus}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label
+                    >
+                      {appsByStatus.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#9ca3af",
+                        borderRadius: "8px",
+                        border: "none",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+
+              <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition">
+                <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
+                  Users applied Jobs by Company
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={jobsByCompany}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="name" stroke="#9ca3af" />
+                    <YAxis allowDecimals={false} stroke="#9ca3af" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1f2937",
+                        borderRadius: "8px",
+                        border: "none",
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="jobs" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="p-6 bg-gray-900/80 border border-gray-700 rounded-2xl shadow-lg hover:shadow-indigo-500/20 transition mt-8">
+              <h2 className="text-2xl font-semibold mb-4 text-indigo-400">
+                Applications by User
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={appliedJobsByUser}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9ca3af" />
+                  <YAxis allowDecimals={false} stroke="#9ca3af" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1f2937",
+                      borderRadius: "8px",
+                      border: "none",
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="applications" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>)};
     </motion.div>
   );
 }
