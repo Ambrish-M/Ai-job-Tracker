@@ -15,6 +15,7 @@ On the other end user can browse the jobs posted by admin,apply job with resume,
  .Express.js
  .Nodemailor
  .JWT token
+ .Gemini api
  .Rest api
  .Cloudinary
 
