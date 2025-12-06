@@ -1,4 +1,4 @@
-✍️  My project is a complete full-stack application built using the mern stack with modern frontend tools and integrated Ai features.
+✍️  My project is a complete full-stack application built using the mern stack with modern frontend tools and integrated Ai features using by Gemini api.
 
 📲  On the frontend ,I used react with vite,tailwind and framermotion to fast and smooth ui.state is manages using zustand and axios interceptors handles authentication securely.
 
