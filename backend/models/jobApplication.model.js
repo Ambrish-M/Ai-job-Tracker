@@ -16,12 +16,12 @@ const jobApplicationSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+    
     },
     phone: {
       type: String,
       required: true,
-      match: [/^\d{10}$/, "Phone must be 10 digits"],
+      
     },
 
     resume: {

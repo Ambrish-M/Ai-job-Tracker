@@ -20,6 +20,21 @@ export const applyJob = async (req, res) => {
     if (!jobId || !name || !email || !phone) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    if (name) {
+      if (name.length < 2) {
+        return res
+          .status(400)
+          .json({ message: "The name must be at least two characters long" });
+      }
+    }
+    if(phone.length !==10){
+      return res.status(400).json({message:"Mobile number should be 10 digits"})
+
+    }
 
     // Resume validation
     if (!resume || !resume.url || !resume.publicId || !resume.originalName) {

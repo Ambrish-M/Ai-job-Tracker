@@ -33,7 +33,7 @@ export default function Login() {
       <motion.h2
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl font-semibold text-center mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
+        className="text-3xl font-semibold text-center mb-6 bg-gradient-to-r from-gray-500 to-red-600 bg-clip-text text-transparent"
       >
         Login
       </motion.h2>
@@ -80,7 +80,7 @@ export default function Login() {
           type="submit"
           disabled={isSubmitting}
           whileHover={{ scale: !isSubmitting ? 1.02 : 1 }}
-          className="w-full py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium shadow-md flex justify-center items-center gap-2"
+          className="w-full py-2.5 rounded-lg bg-gradient-to-r from-gray-500 to-red-600 text-white font-medium shadow-md flex justify-center items-center gap-2"
         >
           {isSubmitting ? (
             <>
@@ -95,7 +95,7 @@ export default function Login() {
 
       <p className="text-center mt-6 text-sm text-gray-600 dark:text-gray-400">
         Don’t have an account?{" "}
-        <Link to="/register" className="font-medium text-indigo-500">
+        <Link to="/register" className="font-medium text-red-500">
           Register
         </Link>
       </p>

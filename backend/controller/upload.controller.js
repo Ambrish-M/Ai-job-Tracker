@@ -32,7 +32,7 @@ export const uploadFile = async (req, res) => {
 
     const result = await cloudinary.uploader.upload(fileDataURI, {
       folder: "resume_uploads",
-      resource_type: "pdf",
+      resource_type: "auto",
       pages: true, // Enables PDF preview thumbnails
     });
 

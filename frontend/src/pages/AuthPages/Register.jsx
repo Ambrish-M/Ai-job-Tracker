@@ -34,7 +34,7 @@ export default function Register() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-bold text-center mb-5 text-gray-100"
+        className="text-3xl font-semibold text-center mb-6 bg-gradient-to-r from-gray-500 to-red-600 bg-clip-text text-transparent"
       >
         Register
       </motion.h2>
@@ -56,7 +56,7 @@ export default function Register() {
             required
             placeholder="Enter your name"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 transition"
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
           />
         </div>
 
@@ -70,7 +70,7 @@ export default function Register() {
             required
             placeholder="Enter your email"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 transition"
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function Register() {
             required
             placeholder="Enter your password"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 transition"
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function Register() {
           disabled={isSubmitting}
           whileHover={{ scale: !isSubmitting ? 1.02 : 1 }}
           whileTap={{ scale: !isSubmitting ? 0.98 : 1 }}
-          className="w-full py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium shadow-md transition disabled:opacity-60"
+          className="w-full py-2.5 rounded-lg bg-gradient-to-r from-gray-500 to-red-600 text-white font-medium shadow-md transition disabled:opacity-60"
         >
           {isSubmitting ? "Registering..." : "Register"}
         </motion.button>
@@ -103,7 +103,7 @@ export default function Register() {
         Already have an account?{" "}
         <Link
           to="/login"
-          className="text-indigo-400 hover:text-indigo-300 transition font-medium"
+          className="text-red-400 hover:text-red-300 transition font-medium"
         >
           Login
         </Link>
@@ -111,4 +111,3 @@ export default function Register() {
     </AuthLayout>
   );
 }
-  

@@ -7,7 +7,7 @@ export default function AuthLayout({ children, title = "AI Job Tracker" }) {
         initial={{ opacity: 0, y: -20, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-4xl md:text-5xl font-extrabold mb-10 tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+        className="text-4xl md:text-5xl font-extrabold mb-10 tracking-tight bg-gradient-to-r from-gray-500 via-red-500 to-yellow-500 bg-clip-text text-transparent"
       >
         {title}
       </motion.h1>

@@ -20,6 +20,18 @@ export const registerUser = async (req, res) => {
         message: "Password must be at least 6 characters long",
       });
     }
+     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    if (name) {
+      if (name.length < 2) {
+        return res
+          .status(400)
+          .json({ message: "The name must be at least two characters long" });
+      }
+    }
+    
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
