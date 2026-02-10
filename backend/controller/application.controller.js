@@ -1,6 +1,6 @@
 import PostedJob from "../models/postedJob.model.js";
 import JobApplication from "../models/jobApplication.model.js";
-import fetch from "node-fetch";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 import { ENV_VARS } from "../config/envVars.js";
 
 /**
@@ -104,14 +104,11 @@ export const getMyApplications = async (req, res) => {
 
 //Update application status
 
-
-
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Find application
     const application = await JobApplication.findById(id);
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
@@ -143,41 +140,26 @@ export const updateStatus = async (req, res) => {
       <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
-    // Validate ENV_VARS
-    if (!ENV_VARS.EMAIL_USER || !/@/.test(ENV_VARS.EMAIL_USER)) {
-      return res.status(500).json({ message: `Invalid EMAIL_USER: ${ENV_VARS.EMAIL_USER}` });
-    }
-    if (!ENV_VARS.BREVO_SMTP_KEY) {
-      return res.status(500).json({ message: "Missing Brevo SMTP/API key" });
-    }
+    // Initialize Brevo SDK
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    const apiKey = defaultClient.authentications["api-key"];
+    apiKey.apiKey = ENV_VARS.BREVO_SMTP_KEY;
 
-    // Send email via Brevo API
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "api-key": ENV_VARS.BREVO_SMTP_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sender: { name: "AI Job Tracker", email: ENV_VARS.EMAIL_USER },
-        to: [{ email: application.email }],
-        subject: `Application Status Update - ${application.jobSnapshot?.role}`,
-        htmlContent,
-      }),
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    // Create the transactional email
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
+      sender: { name: "AI Job Tracker", email: ENV_VARS.EMAIL_USER },
+      to: [{ email: application.email, name: application.name }],
+      subject: `Application Status Update - ${application.jobSnapshot?.role}`,
+      htmlContent,
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error("Brevo API Error:", err);
-      return res.status(500).json({ message: "Failed to send email", error: err });
-    }
-
-    const result = await response.json();
-    console.log("Email sent via Brevo API:", result.messageId || result);
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log("Email sent via Brevo SDK:", result);
 
     res.status(200).json({
-      message: "Status updated and email sent successfully via Brevo API",
+      message: "Status updated and email sent successfully via Brevo SDK",
       application,
     });
 
@@ -186,6 +168,7 @@ export const updateStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update status", error: error.message });
   }
 };
+
 
 
 // Admin: Get all applications
