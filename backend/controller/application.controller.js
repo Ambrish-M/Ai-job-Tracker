@@ -1,6 +1,6 @@
 import PostedJob from "../models/postedJob.model.js";
 import JobApplication from "../models/jobApplication.model.js";
-import nodemailer from "nodemailer";
+import fetch from "node-fetch";
 import { ENV_VARS } from "../config/envVars.js";
 
 /**
@@ -104,16 +104,20 @@ export const getMyApplications = async (req, res) => {
 
 //Update application status
 
+
+
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
+    // Find application
     const application = await JobApplication.findById(id);
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
 
+    // Update status
     application.status = status;
     await application.save();
 
@@ -139,43 +143,50 @@ export const updateStatus = async (req, res) => {
       <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
-    // Brevo SMTP transporter
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: ENV_VARS.BREVO_SMTP_LOGIN,
-        pass: ENV_VARS.BREVO_SMTP_KEY,
+    // Validate ENV_VARS
+    if (!ENV_VARS.EMAIL_USER || !/@/.test(ENV_VARS.EMAIL_USER)) {
+      return res.status(500).json({ message: `Invalid EMAIL_USER: ${ENV_VARS.EMAIL_USER}` });
+    }
+    if (!ENV_VARS.BREVO_SMTP_KEY) {
+      return res.status(500).json({ message: "Missing Brevo SMTP/API key" });
+    }
+
+    // Send email via Brevo API
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": ENV_VARS.BREVO_SMTP_KEY,
+        "Content-Type": "application/json",
       },
-      tls: {
-        rejectUnauthorized: false, // prevents SSL errors in some servers
-      },
-    });
-    transporter.verify((err, success) => {
-      if (err) console.error("SMTP connection error:", err);
-      else console.log("SMTP ready ");
+      body: JSON.stringify({
+        sender: { name: "AI Job Tracker", email: ENV_VARS.EMAIL_USER },
+        to: [{ email: application.email }],
+        subject: `Application Status Update - ${application.jobSnapshot?.role}`,
+        htmlContent,
+      }),
     });
 
-    await transporter.sendMail({
-      from: {
-        name: "AI Job Tracker",
-        address: ENV_VARS.EMAIL_USER,
-      },
-      to: application.email,
-      subject: `Application Status Update - ${application.jobSnapshot?.role}`,
-      html: htmlContent,
-    });
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Brevo API Error:", err);
+      return res.status(500).json({ message: "Failed to send email", error: err });
+    }
+
+    const result = await response.json();
+    console.log("Email sent via Brevo API:", result.messageId || result);
 
     res.status(200).json({
-      message: "Status updated and email sent successfully",
+      message: "Status updated and email sent successfully via Brevo API",
       application,
     });
+
   } catch (error) {
     console.error("Update Status Error:", error);
-    res.status(500).json({ message: "Failed to update status" });
+    res.status(500).json({ message: "Failed to update status", error: error.message });
   }
 };
+
 
 // Admin: Get all applications
 
