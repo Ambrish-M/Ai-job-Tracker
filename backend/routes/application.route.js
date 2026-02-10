@@ -7,14 +7,14 @@ import {
   updateStatus,
 } from "../controller/application.controller.js";
 
-import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
+import { authMiddleware, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 router.post("/apply", authMiddleware, applyJob);
 router.get("/my-applications", authMiddleware, getMyApplications);
-router.get("/getapplications", authMiddleware, adminOnly, getApplications);
-router.put("/:id/status", authMiddleware, adminOnly, updateStatus);
-router.put("/:appId/viewed", authMiddleware, adminOnly, markResumeViewed);
+router.get("/getapplications", authMiddleware, isAdmin, getApplications);
+router.put("/:id/status", authMiddleware, isAdmin, updateStatus);
+router.put("/:appId/viewed", authMiddleware, isAdmin, markResumeViewed);
 
 export default router;

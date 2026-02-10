@@ -7,11 +7,13 @@ import { generateTokens } from "../utils/generateTokens.js";
 // REGISTER USER
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role, adminKey } = req.body;
+
     if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
     if (password.length < 6) {
@@ -20,32 +22,43 @@ export const registerUser = async (req, res) => {
         message: "Password must be at least 6 characters long",
       });
     }
-     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
-    if (name) {
-      if (name.length < 2) {
-        return res
-          .status(400)
-          .json({ message: "The name must be at least two characters long" });
-      }
+
+    if (name.length < 2) {
+      return res.status(400).json({
+        message: "The name must be at least two characters long",
+      });
     }
-    
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    // 🔐 Admin protection
+    if (role === "admin") {
+      if (adminKey !== ENV_VARS.ADMIN_SECRET) {
+        return res.status(403).json({
+          success: false,
+          message: "Invalid admin access key",
+        });
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
-  
+      role: role === "admin" ? "admin" : "user",
     });
 
     res.status(201).json({
@@ -55,15 +68,19 @@ export const registerUser = async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        role: newUser.role,
       },
     });
   } catch (error) {
     console.error("Register Error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
+
 
 //LOGIN USER
 export const loginUser = async (req, res) => {
@@ -82,7 +99,7 @@ export const loginUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: ENV_VARS.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

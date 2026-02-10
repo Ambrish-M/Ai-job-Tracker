@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import useAuthStore from "../../store/authStore";
 import AuthLayout from "../../components/authLayout";
 import toast from "react-hot-toast";
@@ -8,6 +9,8 @@ import toast from "react-hot-toast";
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
@@ -44,6 +47,7 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5"
       >
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Email Address
@@ -60,22 +64,34 @@ export default function Login() {
           />
         </div>
 
-        <div>
+        {/* Password with Eye Toggle */}
+        <div className="relative">
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Password
           </label>
+
           <input
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             minLength={6}
             placeholder="Enter your password"
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700"
+            className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-700"
           />
+
+          <button
+            type="button"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+          </button>
         </div>
 
+        {/* Submit */}
         <motion.button
           type="submit"
           disabled={isSubmitting}

@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import useAuthStore from "../../store/authStore";
 import AuthLayout from "../../components/authLayout";
 import toast from "react-hot-toast";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+    adminKey: "",
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showAdminKey, setShowAdminKey] = useState(false);
+
   const { register } = useAuthStore();
   const navigate = useNavigate();
 
@@ -46,6 +57,7 @@ export default function Register() {
         transition={{ duration: 0.6 }}
         className="space-y-4"
       >
+        {/* Name */}
         <div>
           <label className="block text-sm font-medium mb-1 text-gray-300">
             Name
@@ -56,10 +68,11 @@ export default function Register() {
             required
             placeholder="Enter your name"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500"
           />
         </div>
 
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium mb-1 text-gray-300">
             Email
@@ -70,24 +83,73 @@ export default function Register() {
             required
             placeholder="Enter your email"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500"
           />
         </div>
 
-        <div>
+        {/* Password with Eye */}
+        <div className="relative">
           <label className="block text-sm font-medium mb-1 text-gray-300">
             Password
           </label>
           <input
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
             placeholder="Enter your password"
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500  transition"
+            className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-200"
+          >
+            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+          </button>
         </div>
 
+        {/* Role Selection */}
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-300">
+            Account Type
+          </label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-100"
+          >
+            <option value="user">Job Seeker</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        {/* Admin Key with Eye (Conditional) */}
+        {form.role === "admin" && (
+          <div className="relative">
+            <label className="block text-sm font-medium mb-1 text-gray-300">
+              Admin Access Key
+            </label>
+            <input
+              name="adminKey"
+              type={showAdminKey ? "text" : "password"}
+              required
+              placeholder="Enter admin access key"
+              onChange={handleChange}
+              className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 placeholder-gray-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowAdminKey((prev) => !prev)}
+              className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-200"
+            >
+              {showAdminKey ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+            </button>
+          </div>
+        )}
+
+        {/* Submit */}
         <motion.button
           type="submit"
           disabled={isSubmitting}

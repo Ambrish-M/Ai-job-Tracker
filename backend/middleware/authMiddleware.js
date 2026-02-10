@@ -5,27 +5,25 @@ import { ENV_VARS } from "../config/envVars.js";
 export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "No token provided" });
     }
 
     const token = authHeader.split(" ")[1];
 
-    // Verify token
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
 
+    const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
 
-    //  attach both user and role for role-based access
+    // attach authenticated user
     req.user = user;
-    req.role = user.role;
 
     next();
   } catch (error) {
-    // Handle expired tokens gracefully
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expired" });
     }
@@ -35,10 +33,10 @@ export const authMiddleware = async (req, res, next) => {
   }
 };
 
-//ADMIN ONLY
-export const adminOnly = (req, res, next) => {
-  if (!req.user || req.user.role !== "admin") {
-    return res.status(403).json({ message: "Forbidden: Admins only" });
+// 🔒 Admin-only access
+export const isAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admins only" });
   }
   next();
 };
