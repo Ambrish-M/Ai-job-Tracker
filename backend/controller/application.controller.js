@@ -140,14 +140,12 @@ export const updateStatus = async (req, res) => {
       <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
-    // Initialize Brevo SDK
-    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+     const defaultClient = SibApiV3Sdk.ApiClient.instance;
     const apiKey = defaultClient.authentications["api-key"];
     apiKey.apiKey = ENV_VARS.BREVO_SMTP_KEY;
 
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-    // Create the transactional email
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
       sender: { name: "AI Job Tracker", email: ENV_VARS.EMAIL_USER },
       to: [{ email: application.email, name: application.name }],
@@ -155,21 +153,28 @@ export const updateStatus = async (req, res) => {
       htmlContent,
     });
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log("Email sent via Brevo SDK:", result);
+    // ✅ Send email (separate try/catch)
+    try {
+      const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+      console.log("Email sent via Brevo SDK:", result);
 
-    res.status(200).json({
-      message: "Status updated and email sent successfully via Brevo SDK",
-      application,
-    });
-
+      return res.status(200).json({
+        message: "Status updated and email sent successfully",
+        application,
+      });
+    } catch (emailError) {
+      console.error("Email Send Error:", emailError);
+      return res.status(200).json({
+        message: "Status updated, but failed to send email",
+        application,
+        emailError: emailError.message,
+      });
+    }
   } catch (error) {
-    console.error("Update Status Error:", error);
-    res.status(500).json({ message: "Failed to update status", error: error.message });
+    console.error("Update Status Unexpected Error:", error);
+    res.status(500).json({ message: "Unexpected error occurred", error: error.message });
   }
 };
-
-
 
 // Admin: Get all applications
 
