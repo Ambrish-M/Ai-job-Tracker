@@ -108,46 +108,64 @@ export const updateStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const application = await JobApplication.findById(id).populate("jobId");
-    if (!application)
+    const application = await JobApplication.findById(id);
+    if (!application) {
       return res.status(404).json({ message: "Application not found" });
+    }
 
     application.status = status;
     await application.save();
 
+    // Dynamic closing message
     const closingMessage =
       status === "Interview Scheduled"
-        ? "<p>Congratulations! You've been selected for the interview</p>"
+        ? "<p>🎯 Congratulations! You've been selected for the interview.</p>"
         : status === "Rejected"
-        ? "<p>Sorry! Try other opportunities.</p>"
+        ? "<p>❌ Unfortunately, this application was not successful.</p>"
         : status === "Offer"
-        ? "<p>🎉 Congrats on the offer!</p>"
-        : "<p>Good luck!</p>";
+        ? "<p>🎉 Congratulations on receiving the offer!</p>"
+        : "<p>📌 Best of luck!</p>";
 
     const htmlContent = `
       <p>Hi ${application.name},</p>
-      <p>Your application for <b>${application.jobSnapshot?.role}</b> at <b>${application.jobSnapshot?.company}</b> is now: <b>${status}</b>.</p>
+      <p>
+        Your application for <b>${application.jobSnapshot?.role}</b>
+        at <b>${application.jobSnapshot?.company}</b>
+        is now <b>${status}</b>.
+      </p>
       ${closingMessage}
+      <br />
+      <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
+    // Brevo SMTP transporter
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: ENV_VARS.EMAIL_USER, pass: ENV_VARS.EMAIL_PASS },
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: ENV_VARS.BREVO_SMTP_LOGIN, 
+        pass: ENV_VARS.BREVO_SMTP_KEY,   
+      },
     });
 
     await transporter.sendMail({
-      from: ENV_VARS.EMAIL_USER,
+      from: `"AI Job Tracker" <${ENV_VARS.EMAIL_USER}>`,
       to: application.email,
       subject: `Application Status Update - ${application.jobSnapshot?.role}`,
       html: htmlContent,
     });
 
-    res.json({ message: "Status updated and email sent", application });
+    res.status(200).json({
+      message: "Status updated and email sent successfully",
+      application,
+    });
   } catch (error) {
     console.error("Update Status Error:", error);
     res.status(500).json({ message: "Failed to update status" });
   }
 };
+
 
 // Admin: Get all applications
 
