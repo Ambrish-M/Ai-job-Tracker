@@ -1,4 +1,5 @@
-import PostedJob from "../models/postedJob.model.js";
+import PostedJob from "../models/postedJob.model.js"; 
+import mongoose from "mongoose";
 import JobApplication from "../models/jobApplication.model.js";
 import SibApiV3Sdk from "sib-api-v3-sdk";
 import { ENV_VARS } from "../config/envVars.js";
@@ -104,29 +105,47 @@ export const getMyApplications = async (req, res) => {
 
 //Update application status
 
+
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
+    //  Validate input
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid application ID" });
+    }
+
+    if (!status || typeof status !== "string") {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    // Find application
     const application = await JobApplication.findById(id);
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
 
-    // Update status
+    // Update status in DB
     application.status = status;
-    await application.save();
+    try {
+      await application.save();
+    } catch (dbError) {
+      console.error("DB Save Error:", dbError);
+      return res
+        .status(500)
+        .json({ message: "Failed to update status", error: dbError.message });
+    }
 
-    // Dynamic closing message
+    //  Prepare email
     const closingMessage =
       status === "Interview Scheduled"
         ? "<p>🎯 Congratulations! You've been selected for the interview.</p>"
         : status === "Rejected"
-          ? "<p>❌ Unfortunately, this application was not successful.</p>"
-          : status === "Offer"
-            ? "<p>🎉 Congratulations on receiving the offer!</p>"
-            : "<p>📌 Best of luck!</p>";
+        ? "<p>❌ Unfortunately, this application was not successful.</p>"
+        : status === "Offer"
+        ? "<p>🎉 Congratulations on receiving the offer!</p>"
+        : "<p>📌 Best of luck!</p>";
 
     const htmlContent = `
       <p>Hi ${application.name},</p>
@@ -140,10 +159,9 @@ export const updateStatus = async (req, res) => {
       <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
-     const defaultClient = SibApiV3Sdk.ApiClient.instance;
-    const apiKey = defaultClient.authentications["api-key"];
-    apiKey.apiKey = ENV_VARS.BREVO_SMTP_KEY;
-
+    //  Initialize Brevo API
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    defaultClient.authentications["api-key"].apiKey = ENV_VARS.BREVO_SMTP_KEY;
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
@@ -153,7 +171,7 @@ export const updateStatus = async (req, res) => {
       htmlContent,
     });
 
-    // ✅ Send email (separate try/catch)
+    //  Send email in separate try/catch
     try {
       const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
       console.log("Email sent via Brevo SDK:", result);
@@ -172,9 +190,13 @@ export const updateStatus = async (req, res) => {
     }
   } catch (error) {
     console.error("Update Status Unexpected Error:", error);
-    res.status(500).json({ message: "Unexpected error occurred", error: error.message });
+    return res.status(500).json({
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
   }
 };
+
 
 // Admin: Get all applications
 
