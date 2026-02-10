@@ -148,6 +148,13 @@ export const updateStatus = async (req, res) => {
         user: ENV_VARS.BREVO_SMTP_LOGIN,
         pass: ENV_VARS.BREVO_SMTP_KEY,
       },
+      tls: {
+        rejectUnauthorized: false, // prevents SSL errors in some servers
+      },
+    });
+    transporter.verify((err, success) => {
+      if (err) console.error("SMTP connection error:", err);
+      else console.log("SMTP ready ");
     });
 
     await transporter.sendMail({
