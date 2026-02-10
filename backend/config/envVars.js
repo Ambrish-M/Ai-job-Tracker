@@ -11,5 +11,5 @@ export const ENV_VARS = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   EMAIL_USER: process.env.EMAIL_USER,
   EMAIL_PASS: process.env.EMAIL_PASS,
-  FRONTEND_URL: process.env.FRONTEND_URL,
+
 };

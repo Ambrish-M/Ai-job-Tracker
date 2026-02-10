@@ -16,7 +16,7 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: ENV_VARS.FRONTEND_URL,
+    origin:["http://localhost:5173","https://ai-job-trackerr.netlify.app"],
     credentials: true,
   })
 );
