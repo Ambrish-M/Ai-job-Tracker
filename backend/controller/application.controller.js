@@ -20,7 +20,7 @@ export const applyJob = async (req, res) => {
     if (!jobId || !name || !email || !phone) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
@@ -31,9 +31,10 @@ export const applyJob = async (req, res) => {
           .json({ message: "The name must be at least two characters long" });
       }
     }
-    if(phone.length !==10){
-      return res.status(400).json({message:"Mobile number should be 10 digits"})
-
+    if (phone.length !== 10) {
+      return res
+        .status(400)
+        .json({ message: "Mobile number should be 10 digits" });
     }
 
     // Resume validation
@@ -121,10 +122,10 @@ export const updateStatus = async (req, res) => {
       status === "Interview Scheduled"
         ? "<p>🎯 Congratulations! You've been selected for the interview.</p>"
         : status === "Rejected"
-        ? "<p>❌ Unfortunately, this application was not successful.</p>"
-        : status === "Offer"
-        ? "<p>🎉 Congratulations on receiving the offer!</p>"
-        : "<p>📌 Best of luck!</p>";
+          ? "<p>❌ Unfortunately, this application was not successful.</p>"
+          : status === "Offer"
+            ? "<p>🎉 Congratulations on receiving the offer!</p>"
+            : "<p>📌 Best of luck!</p>";
 
     const htmlContent = `
       <p>Hi ${application.name},</p>
@@ -144,13 +145,16 @@ export const updateStatus = async (req, res) => {
       port: 587,
       secure: false,
       auth: {
-        user: ENV_VARS.BREVO_SMTP_LOGIN, 
-        pass: ENV_VARS.BREVO_SMTP_KEY,   
+        user: ENV_VARS.BREVO_SMTP_LOGIN,
+        pass: ENV_VARS.BREVO_SMTP_KEY,
       },
     });
 
     await transporter.sendMail({
-      from: `"AI Job Tracker" <${ENV_VARS.EMAIL_USER}>`,
+      from: {
+        name: "AI Job Tracker",
+        address: ENV_VARS.EMAIL_USER,
+      },
       to: application.email,
       subject: `Application Status Update - ${application.jobSnapshot?.role}`,
       html: htmlContent,
@@ -165,7 +169,6 @@ export const updateStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update status" });
   }
 };
-
 
 // Admin: Get all applications
 

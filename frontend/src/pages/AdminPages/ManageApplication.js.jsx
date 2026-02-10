@@ -27,15 +27,27 @@ export default function ManageApplications() {
 
   const handleStatusChange = async (appId, newStatus) => {
     if (!appId) return;
+
+    // 🔹 Optimistic UI update
+    setApplications((prev) =>
+      prev.map((app) =>
+        app._id === appId ? { ...app, status: newStatus } : app
+      )
+    );
+
     try {
       setUpdatingId(appId);
-      await api.put(`/applications/${appId}/status`, { status: newStatus });
+      await api.put(`/applications/${appId}/status`, {
+        status: newStatus,
+      });
+
       toast.success(`Status updated to ${newStatus}`);
-      fetchApplications();
-      window.dispatchEvent(new Event("analyticsRefresh"));
     } catch (err) {
       console.error("Status update failed", err);
       toast.error("Failed to update status");
+
+      // 🔁 Rollback on failure
+      fetchApplications();
     } finally {
       setUpdatingId(null);
     }
