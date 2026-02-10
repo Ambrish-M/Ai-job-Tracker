@@ -6,22 +6,29 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Attach access token
+/*   REQUEST INTERCEPTOR */
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Do NOT attach token to refresh endpoint
+  if (!config.url.includes("/auth/refresh")) {
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
 
-// Refresh token on 401
+/* RESPONSE INTERCEPTOR */
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config;
 
-    if (err.response?.status === 401 && !originalRequest._retry) {
+    if (
+      err.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -30,11 +37,14 @@ api.interceptors.response.use(
         const { setAuth, user } = useAuthStore.getState();
         setAuth(user, data.accessToken);
 
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        originalRequest.headers.Authorization =
+          `Bearer ${data.accessToken}`;
+
         return api(originalRequest);
       } catch (refreshErr) {
         useAuthStore.getState().logout();
         window.location.href = "/login";
+        return Promise.reject(refreshErr);
       }
     }
 

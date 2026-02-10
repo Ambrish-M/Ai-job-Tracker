@@ -81,7 +81,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
 //LOGIN USER
 export const loginUser = async (req, res) => {
   try {
@@ -98,9 +97,10 @@ export const loginUser = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: ENV_VARS.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/api/auth/refresh",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -125,32 +125,40 @@ export const loginUser = async (req, res) => {
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "No refresh token found" });
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
     }
 
-    // Verify old refresh token
-    const decoded = jwt.verify(token, ENV_VARS.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, ENV_VARS.JWT_REFRESH_SECRET);
+
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res
-        .status(403)
-        .json({ success: false, message: "User not found" });
+      return res.status(401).json({ message: "User not found" });
     }
 
-    //  Create *new access token with full user info*
     const newAccessToken = jwt.sign(
       { id: user._id, role: user.role },
       ENV_VARS.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
-    res.json({ success: true, accessToken: newAccessToken });
-  } catch (error) {
-    console.error("Refresh Token Error:", error);
-    res.status(403).json({ success: false, message: "Invalid refresh token" });
+    const newRefreshToken = jwt.sign(
+      { id: user._id },
+      ENV_VARS.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/api/auth/refresh",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 };
