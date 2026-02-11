@@ -1,4 +1,4 @@
-import PostedJob from "../models/postedJob.model.js"; 
+import PostedJob from "../models/postedJob.model.js";
 import mongoose from "mongoose";
 import axios from "axios";
 import JobApplication from "../models/jobApplication.model.js";
@@ -105,9 +105,6 @@ export const getMyApplications = async (req, res) => {
 
 //Update application status
 
-
-
-
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -144,10 +141,10 @@ export const updateStatus = async (req, res) => {
       status === "Interview Scheduled"
         ? "<p>🎯 Congratulations! You've been selected for the interview.</p>"
         : status === "Rejected"
-        ? "<p>❌ Unfortunately, this application was not successful.</p>"
-        : status === "Offer"
-        ? "<p>🎉 Congratulations on receiving the offer!</p>"
-        : "<p>📌 Best of luck!</p>";
+          ? "<p>❌ Unfortunately, this application was not successful.</p>"
+          : status === "Offer"
+            ? "<p>🎉 Congratulations on receiving the offer!</p>"
+            : "<p>📌 Best of luck!</p>";
 
     const htmlContent = `
       <p>Hi ${application.name || "Applicant"},</p>
@@ -176,7 +173,9 @@ export const updateStatus = async (req, res) => {
         "https://api.sendinblue.com/v3/smtp/email",
         {
           sender: { name: "AI Job Tracker", email: "ambrish2706@gmail.com" }, // verified sender
-          to: [{ email: application.email, name: application.name || "Applicant" }],
+          to: [
+            { email: application.email, name: application.name || "Applicant" },
+          ],
           subject: `Application Status Update - ${application.jobSnapshot?.role || ""}`,
           htmlContent,
         },
@@ -186,17 +185,19 @@ export const updateStatus = async (req, res) => {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
 
       console.log("Email sent successfully:", response.data);
 
       return res.status(200).json({
-        message: "Status updated and email sent successfully",
         application,
       });
     } catch (emailError) {
-      console.error("Email Send Error:", emailError.response?.data || emailError.message);
+      console.error(
+        "Email Send Error:",
+        emailError.response?.data || emailError.message,
+      );
       return res.status(200).json({
         message: "Status updated, but failed to send email",
         application,
@@ -211,10 +212,6 @@ export const updateStatus = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 // Admin: Get all applications
 
