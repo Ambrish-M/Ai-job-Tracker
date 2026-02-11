@@ -2,7 +2,7 @@
 
 📲  On the frontend ,I used react with vite,tailwind and framermotion to fast and smooth ui,state is manages using zustand and axios interceptors handles authentication securely.
 
-💻  I used a modular backend architecture(MVC),stateless JWT authentication with access and refresh token ,Scalalable MongoDB,Cloudinary for offloading uploads ,Rest api for seem less connection between both ends and Nodemailor for email service.
+💻  I used a modular backend architecture(MVC),stateless JWT authentication with access and refresh token ,Scalalable MongoDB,Cloudinary for offloading uploads ,Rest api for seem less connection between both ends and Brevo for email service.
 
 🪄Features
 A role based job application admin can make CRUD operations,Managing job application by user applied jobs ,view user resume ,handle job status to send job status to the user via email and use an analytics dashboard for handle collection of job data.
@@ -13,7 +13,7 @@ On the other end user can browse the jobs posted by admin,apply job with resume,
  .Node.js
  .Mongo DB
  .Express.js
- .Nodemailor
+ .Brevo
  .JWT token
  .Gemini api
  .Rest api
