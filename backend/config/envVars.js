@@ -9,8 +9,6 @@ export const ENV_VARS = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  EMAIL_USER: process.env.EMAIL_USER,
   BREVO_SMTP_LOGIN: process.env.BREVO_SMTP_LOGIN,
-
   BREVO_SMTP_KEY: process.env.BREVO_SMTP_KEY,
 };

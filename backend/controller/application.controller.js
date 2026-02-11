@@ -1,7 +1,7 @@
 import PostedJob from "../models/postedJob.model.js"; 
 import mongoose from "mongoose";
+import axios from "axios";
 import JobApplication from "../models/jobApplication.model.js";
-import SibApiV3Sdk from "sib-api-v3-sdk";
 import { ENV_VARS } from "../config/envVars.js";
 
 /**
@@ -106,6 +106,8 @@ export const getMyApplications = async (req, res) => {
 //Update application status
 
 
+
+
 export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,12 +117,11 @@ export const updateStatus = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid application ID" });
     }
-
     if (!status || typeof status !== "string") {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    // Find application
+    //  Find application
     const application = await JobApplication.findById(id);
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
@@ -132,12 +133,13 @@ export const updateStatus = async (req, res) => {
       await application.save();
     } catch (dbError) {
       console.error("DB Save Error:", dbError);
-      return res
-        .status(500)
-        .json({ message: "Failed to update status", error: dbError.message });
+      return res.status(500).json({
+        message: "Failed to update status",
+        error: dbError.message,
+      });
     }
 
-    //  Prepare email
+    //  Prepare email content
     const closingMessage =
       status === "Interview Scheduled"
         ? "<p>🎯 Congratulations! You've been selected for the interview.</p>"
@@ -148,10 +150,10 @@ export const updateStatus = async (req, res) => {
         : "<p>📌 Best of luck!</p>";
 
     const htmlContent = `
-      <p>Hi ${application.name},</p>
+      <p>Hi ${application.name || "Applicant"},</p>
       <p>
-        Your application for <b>${application.jobSnapshot?.role}</b>
-        at <b>${application.jobSnapshot?.company}</b>
+        Your application for <b>${application.jobSnapshot?.role || "the role"}</b>
+        at <b>${application.jobSnapshot?.company || "the company"}</b>
         is now <b>${status}</b>.
       </p>
       ${closingMessage}
@@ -159,33 +161,46 @@ export const updateStatus = async (req, res) => {
       <p>Regards,<br/>AI Job Tracker Team</p>
     `;
 
-    //  Initialize Brevo API
-    const defaultClient = SibApiV3Sdk.ApiClient.instance;
-    defaultClient.authentications["api-key"].apiKey = ENV_VARS.BREVO_SMTP_KEY;
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    // Ensure recipient exists
+    if (!application.email) {
+      console.error("Recipient email missing for application:", id);
+      return res.status(400).json({
+        message: "Recipient email is missing",
+        application,
+      });
+    }
 
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
-      sender: { name: "AI Job Tracker", email: ENV_VARS.EMAIL_USER },
-      to: [{ email: application.email, name: application.name }],
-      subject: `Application Status Update - ${application.jobSnapshot?.role}`,
-      htmlContent,
-    });
-
-    //  Send email in separate try/catch
+    // Send email using axios (direct API call)
     try {
-      const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-      console.log("Email sent via Brevo SDK:", result);
+      const response = await axios.post(
+        "https://api.sendinblue.com/v3/smtp/email",
+        {
+          sender: { name: "AI Job Tracker", email: "ambrish2706@gmail.com" }, // verified sender
+          to: [{ email: application.email, name: application.name || "Applicant" }],
+          subject: `Application Status Update - ${application.jobSnapshot?.role || ""}`,
+          htmlContent,
+        },
+        {
+          headers: {
+            "api-key": ENV_VARS.BREVO_SMTP_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      console.log("Email sent successfully:", response.data);
 
       return res.status(200).json({
         message: "Status updated and email sent successfully",
         application,
       });
     } catch (emailError) {
-      console.error("Email Send Error:", emailError);
+      console.error("Email Send Error:", emailError.response?.data || emailError.message);
       return res.status(200).json({
         message: "Status updated, but failed to send email",
         application,
-        emailError: emailError.message,
+        emailError: emailError.response?.data?.message || emailError.message,
       });
     }
   } catch (error) {
@@ -196,6 +211,9 @@ export const updateStatus = async (req, res) => {
     });
   }
 };
+
+
+
 
 
 // Admin: Get all applications

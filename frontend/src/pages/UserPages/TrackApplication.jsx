@@ -37,7 +37,7 @@ export default function TrackApplications() {
             onClick={fetchApps}
             className="mt-4 sm:mt-0 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            🔄 Refresh
+            Refresh
           </button>
         </div>
 
@@ -76,7 +76,7 @@ export default function TrackApplications() {
                       </div>
 
                       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        🏢 {companyName}
+                        {companyName}
                       </p>
 
                       <div className="space-y-2 text-sm">
@@ -101,11 +101,11 @@ export default function TrackApplications() {
                           <span className="font-semibold">Resume:</span>{" "}
                           {app.viewedByAdmin ? (
                             <span className="text-green-600 dark:text-green-400 font-medium">
-                              👀 Viewed by Admin
+                               Viewed by Admin
                             </span>
                           ) : (
                             <span className="text-yellow-600 dark:text-yellow-400 font-medium">
-                              ⏳ Not Viewed Yet
+                               Not Viewed Yet
                             </span>
                           )}
                         </p>

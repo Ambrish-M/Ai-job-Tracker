@@ -12,7 +12,6 @@ import { ENV_VARS } from "./config/envVars.js";
 
 const app = express();
 
-
 // CORS
 app.use(
   cors({
